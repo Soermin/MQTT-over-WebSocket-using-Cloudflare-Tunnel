@@ -1,8 +1,0 @@
-# Replace placeholders with real values after creating a named tunnel.
-tunnel: <TUNNEL_UUID>
-credentials-file: /etc/cloudflared/<TUNNEL_UUID>.json
-
-ingress:
-  - hostname: mqtt.example.com
-    service: http://localhost:8000
-  - service: http_status:404
