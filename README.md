@@ -5,7 +5,8 @@ Contoh ini menunjukkan cara menghubungkan ESP32 ke broker MQTT melalui **WebSock
 
 ## Arsitektur
 
-<img width="1448" height="1086" alt="ChatGPT Image Jul 1, 2026, 10_57_41 AM" src="https://github.com/user-attachments/assets/b5a26cc6-75c0-4c39-b25b-c69ffea0c658" />
+<img width="1448" height="888" alt="Arsitektur Sistem" src="https://github.com/user-attachments/assets/6df7791e-58ec-4970-9ad1-250a33ce6722" />
+
 
 WebSocket diawali sebagai permintaan HTTP dengan mekanisme *upgrade*. Karena itu `cloudflared` dapat menggunakan service `http://localhost:8000` untuk meneruskan koneksi ke listener Mosquitto berbasis WebSocket.
 
