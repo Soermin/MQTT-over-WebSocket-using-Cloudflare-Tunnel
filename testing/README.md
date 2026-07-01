@@ -1,17 +1,17 @@
 # HiveMQ WebSocket Client Test
 
-Pengujian dilakukan menggunakan [HiveMQ WebSocket Client](https://www.hivemq.com/demos/websocket-client/).
+Testing was conducted using [HiveMQ WebSocket Client](https://www.hivemq.com/demos/websocket-client/).
 
-## Koneksi
+## Connection
 
-| Parameter | Nilai |
+| Parameter | Value |
 |---|---|
 | Host | `mqtt.example.com` |
 | Port | `443` |
 | SSL | Aktif |
 | Client ID | Bebas dan unik |
 
-Browser terhubung melalui:
+The browser connects via:
 
 ```text
 wss://mqtt.example.com:443
@@ -24,21 +24,21 @@ wss://mqtt.example.com:443
 
 <img width="1270" height="791" alt="image" src="https://github.com/user-attachments/assets/fb7e78ae-65e1-4197-8e18-a335a66019fa" />
 
-Dari HiveMQ WebSocket Client, pesan dikirim dengan konfigurasi:
+From the HiveMQ WebSocket Client, the message is sent with the following configuration:
 ```text
 Topic   : coba_mqtt_over_websocket
 Message : Percobaan Berhasil
 QoS     : 0
 ```
 
-Pada gateway, subscriber lokal dijalankan dengan:
+On the gateway, the local subscriber is run with:
 ```text
 mosquitto_sub -t "coba_mqtt_over_websocket" -v
 ```
 
-### Pesan berhasil diterima oleh Mosquitto lokal:
+### Message successfully received by the local Mosquitto broker :
 
 <img width="638" height="120" alt="image" src="https://github.com/user-attachments/assets/907472c4-7cd2-43a4-84f5-8e21a9e4a634" />
 
 
-Pengujian ini membuktikan bahwa client browser dapat melakukan publish MQTT melalui WebSocket dan Cloudflare Tunnel ke Mosquitto Broker lokal.
+This test proves that a browser client can publish MQTT messages over WebSocket and Cloudflare Tunnel to the local Mosquitto Broker.
