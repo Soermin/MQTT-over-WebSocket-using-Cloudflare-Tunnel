@@ -19,8 +19,6 @@ WebSocket diawali sebagai permintaan HTTP dengan mekanisme *upgrade*. Karena itu
 │   └── ESP32_MQTT_WebSocket.ino
 ├── mosquitto/
 │   └── mosquitto-websocket.conf.example
-├── cloudflared/
-│   └── config.yml.example
 └── tools/
     └── test-local.sh
 ```
