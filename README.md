@@ -220,6 +220,10 @@ mosquitto_pub -h 127.0.0.1 -p 1883 \
 
 Perintah akan muncul di Serial Monitor ESP32.
 
+## Pengujian Tambahan
+
+Pengujian MQTT over WebSocket menggunakan browser tersedia di [testing/hivemq-websocket](testing/hivemq-websocket/README.md).
+
 ## Catatan keamanan
 
 Contoh utama memakai `ws://...:80` karena mengikuti konfigurasi yang terbukti berjalan pada implementasi awal. Untuk penggunaan jaringan publik atau produksi, gunakan **`wss://...:443`** agar lalu lintas ESP32 ke Cloudflare terenkripsi. Implementasi `wss` membutuhkan validasi sertifikat CA pada ESP32, misalnya dengan certificate bundle atau CA certificate yang sesuai.
