@@ -1,16 +1,16 @@
-# MQTT over WebSocket dengan ESP32, Mosquitto, dan Cloudflare Tunnel
+# MQTT over WebSocket with ESP32, Mosquitto, and Cloudflare Tunnel
 
-Contoh ini menunjukkan cara menghubungkan ESP32 ke broker MQTT melalui **WebSocket** yang dipublikasikan memakai **Cloudflare Tunnel**.
-
-
-## Arsitektur
-
-<img width="1448" height="888" alt="Arsitektur Sistem" src="https://github.com/user-attachments/assets/6df7791e-58ec-4970-9ad1-250a33ce6722" />
+This example shows how to connect an ESP32 to an MQTT broker via **WebSocket**, published using **Cloudflare Tunnel**.
 
 
-WebSocket diawali sebagai permintaan HTTP dengan mekanisme *upgrade*. Karena itu `cloudflared` dapat menggunakan service `http://localhost:8000` untuk meneruskan koneksi ke listener Mosquitto berbasis WebSocket.
+## Architecture
 
-## Struktur berkas
+<img width="1448" height="888" alt="System Architecture" src="https://github.com/user-attachments/assets/6df7791e-58ec-4970-9ad1-250a33ce6722" />
+
+
+WebSocket begins as an HTTP request with an *upgrade* mechanism. Because of that, `cloudflared` can use the `http://localhost:8000` service to forward the connection to the WebSocket-based Mosquitto listener.
+
+## File structure
 
 ```text
 .
@@ -23,41 +23,41 @@ WebSocket diawali sebagai permintaan HTTP dengan mekanisme *upgrade*. Karena itu
     └── test-local.sh
 ```
 
-## Prasyarat
+## Prerequisites
 
-### Gateway / server broker
+### Gateway / broker server
 
-- Eclipse Mosquitto dengan dukungan WebSocket.
-- `cloudflared` yang telah diautentikasi ke akun Cloudflare.
-- Domain atau subdomain yang dikelola melalui Cloudflare.
+- Eclipse Mosquitto with WebSocket support.
+- `cloudflared` authenticated to a Cloudflare account.
+- A domain or subdomain managed through Cloudflare.
 
 ### ESP32
 
-- Board ESP32 pada Arduino IDE.
-- Library **DHT sensor library** oleh Adafruit.
-- Library **Adafruit Unified Sensor**.
+- ESP32 board on Arduino IDE.
+- **DHT sensor library** by Adafruit.
+- **Adafruit Unified Sensor** library.
 
-## 1. Konfigurasi Mosquitto
+## 1. Mosquitto Configuration
 
-Salin isi `mosquitto/mosquitto-websocket.conf.example` sebagai berkas konfigurasi tambahan, misalnya:
+Copy the contents of `mosquitto/mosquitto-websocket.conf.example` as an additional configuration file, for example:
 
 ```bash
 sudo nano /etc/mosquitto/conf.d/websocket.conf
 ```
 
-Contoh konfigurasi:
+Example configuration:
 
 ```conf
-# Listener MQTT biasa. Pertahankan bila aplikasi lokal memakai MQTT TCP.
+# Regular MQTT listener. Keep this if local applications use MQTT TCP.
 listener 1883 127.0.0.1
 protocol mqtt
 
-# Listener khusus MQTT over WebSocket.
-# Dibatasi ke localhost karena akses publik diberikan hanya melalui Cloudflare Tunnel.
+# Dedicated MQTT over WebSocket listener.
+# Restricted to localhost because public access is only provided via Cloudflare Tunnel.
 listener 8000 127.0.0.1
 protocol websockets
 
-# Jangan membiarkan broker publik tanpa autentikasi.
+# Don't leave the broker public without authentication.
 listener_allow_anonymous false
 password_file /etc/mosquitto/passwd
 
@@ -66,7 +66,7 @@ persistence_location /var/lib/mosquitto/
 log_dest file /var/log/mosquitto/mosquitto.log
 ```
 
-Buat akun MQTT:
+Create an MQTT account:
 
 ```bash
 sudo mosquitto_passwd -c /etc/mosquitto/passwd esp32-node
@@ -75,69 +75,69 @@ sudo systemctl status mosquitto
 sudo ss -ltnp | grep ':8000'
 ```
 
-Jika Mosquitto gagal saat dijalankan, periksa log berikut:
+If Mosquitto fails to start, check the following log:
 
 ```bash
 sudo journalctl -u mosquitto -n 100 --no-pager
 ```
 
-> Bila broker Anda sudah mempunyai listener `1883`, **jangan menduplikasinya**. Tambahkan hanya listener WebSocket `8000` dan sesuaikan aturan autentikasi dengan konfigurasi broker yang sudah ada.
+> If your broker already has a `1883` listener, **do not duplicate it**. Only add the `8000` WebSocket listener and adjust the authentication rules to match your existing broker configuration.
 
-## 2. Konfigurasi Cloudflare Tunnel melalui Web UI
+## 2. Cloudflare Tunnel Configuration via Web UI
 
-Konfigurasi Cloudflare Tunnel dilakukan melalui Cloudflare Dashboard agar pembuatan tunnel, hostname publik, dan DNS record dapat dikelola dari antarmuka web.
+Cloudflare Tunnel configuration is done through the Cloudflare Dashboard so that tunnel creation, public hostname, and DNS records can be managed from the web interface.
 
-1. Masuk ke **Cloudflare Dashboard**.
+1. Log in to the **Cloudflare Dashboard**.
 
-2. Buka menu:
+2. Open the menu:
 
    ```text
    Networking → Tunnels
    ```
 
-   Pada beberapa akun atau tampilan Zero Trust, menu ini dapat berada pada:
+   On some accounts or Zero Trust views, this menu may be located at:
 
    ```text
    Zero Trust → Networks → Connectors → Cloudflare Tunnels
    ```
 
-3. Klik **Create Tunnel**.
+3. Click **Create Tunnel**.
 
-4. Pilih tipe connector **Cloudflared**, lalu masukkan nama tunnel, misalnya:
+4. Choose the **Cloudflared** connector type, then enter a tunnel name, for example:
 
    ```text
    mqtt-websocket
    ```
 
-5. Pilih sistem operasi dan arsitektur server yang menjalankan Mosquitto. Cloudflare akan menampilkan perintah instalasi dan token connector.
+5. Select the operating system and architecture of the server running Mosquitto. Cloudflare will display the installation command and connector token.
 
-6. Salin perintah yang diberikan Cloudflare lalu jalankan pada server. Contoh bentuk perintahnya:
+6. Copy the command provided by Cloudflare and run it on the server. Example command format:
 
    ```bash
-   sudo cloudflared service install <TOKEN_DARI_CLOUDFLARE>
+   sudo cloudflared service install <TOKEN_FROM_CLOUDFLARE>
    ```
 
-   Jangan membagikan token tersebut ke repository publik karena token digunakan untuk menghubungkan server ke tunnel Cloudflare.
+   Do not share this token in a public repository, as the token is used to connect the server to the Cloudflare tunnel.
 
-7. Setelah connector aktif, kembali ke halaman tunnel lalu buka tab **Routes**.
+7. Once the connector is active, return to the tunnel page and open the **Routes** tab.
 
-8. Klik **Add route** kemudian pilih **Published application**.
+8. Click **Add route** then select **Published application**.
 
-9. Isi konfigurasi berikut:
+9. Fill in the following configuration:
 
-   | Parameter    | Nilai                   |
+   | Parameter    | Value                    |
    | ------------ | ----------------------- |
    | Hostname     | `mqtt.example.com`      |
    | Service type | `HTTP`                  |
    | URL          | `http://localhost:8000` |
 
-   Ganti `mqtt.example.com` dengan subdomain milik Anda.
+   Replace `mqtt.example.com` with your own subdomain.
 
-10. Klik **Add route** atau **Save hostname**.
+10. Click **Add route** or **Save hostname**.
 
-Cloudflare akan membuat DNS record untuk hostname tersebut dan meneruskan koneksi HTTP maupun WebSocket ke service lokal Mosquitto pada port `8000`.
+Cloudflare will create a DNS record for that hostname and forward both HTTP and WebSocket connections to the local Mosquitto service on port `8000`.
 
-Arsitektur koneksinya menjadi:
+The resulting connection architecture becomes:
 
 ```text
 ESP32
@@ -147,36 +147,36 @@ ESP32
   → Mosquitto WebSocket Listener
 ```
 
-Untuk penggunaan produksi, gunakan koneksi terenkripsi:
+For production use, use an encrypted connection:
 
 ```text
 wss://mqtt.example.com:443
 ```
 
-Cloudflare Tunnel tetap diarahkan ke:
+Cloudflare Tunnel is still directed to:
 
 ```text
 http://localhost:8000
 ```
 
-karena WebSocket dimulai sebagai koneksi HTTP lalu melakukan proses upgrade ke WebSocket pada listener Mosquitto.
+because WebSocket starts as an HTTP connection and then performs an upgrade process to WebSocket on the Mosquitto listener.
 
-## 3. Konfigurasi sketch ESP32
+## 3. ESP32 Sketch Configuration
 
-Buka `esp32/ESP32_MQTT_WebSocket.ino`, kemudian ubah bagian berikut:
+Open `esp32/ESP32_MQTT_WebSocket.ino`, then modify the following section:
 
 ```cpp
-const char* WIFI_SSID     = "NAMA_WIFI";
-const char* WIFI_PASSWORD = "PASSWORD_WIFI";
+const char* WIFI_SSID     = "WIFI_NAME";
+const char* WIFI_PASSWORD = "WIFI_PASSWORD";
 
 const char* MQTT_URI      = "ws://mqtt.example.com:80";
 const char* MQTT_USERNAME = "esp32-node";
-const char* MQTT_PASSWORD = "PASSWORD_MQTT";
+const char* MQTT_PASSWORD = "MQTT_PASSWORD";
 
 const char* NODE_ID       = "node-01";
 ```
 
-Upload sketch ke ESP32 dan buka Serial Monitor pada **115200 baud**. Saat koneksi berhasil, serial monitor akan menampilkan:
+Upload the sketch to the ESP32 and open the Serial Monitor at **115200 baud**. When the connection succeeds, the serial monitor will display:
 
 ```text
 WiFi connected. IP: ...
@@ -185,56 +185,56 @@ Subscribed: sensors/node-01/command
 Published: {"node":"node-01", ...}
 ```
 
-Data dikirim setiap 10 detik ke:
+Data is sent every 10 seconds to:
 
 ```text
 sensors/node-01/data
 ```
 
-ESP32 juga berlangganan ke:
+The ESP32 also subscribes to:
 
 ```text
 sensors/node-01/command
 ```
 
-## 4. Uji publish dan subscribe
+## 4. Publish and Subscribe Test
 
-Pada gateway, gunakan listener MQTT TCP lokal untuk melihat pesan yang masuk dari ESP32 WebSocket:
+On the gateway, use the local MQTT TCP listener to view incoming messages from the ESP32 WebSocket:
 
 ```bash
 mosquitto_sub -h 127.0.0.1 -p 1883 \
-  -u esp32-node -P 'PASSWORD_MQTT' \
+  -u esp32-node -P 'MQTT_PASSWORD' \
   -t 'sensors/#' -v
 ```
 
-Kirim perintah balik ke ESP32:
+Send a command back to the ESP32:
 
 ```bash
 mosquitto_pub -h 127.0.0.1 -p 1883 \
-  -u esp32-node -P 'PASSWORD_MQTT' \
+  -u esp32-node -P 'MQTT_PASSWORD' \
   -t 'sensors/node-01/command' \
   -m '{"action":"ping"}'
 ```
 
-Perintah akan muncul di Serial Monitor ESP32.
+The command will appear on the ESP32 Serial Monitor.
 
-## Pengujian Tambahan
+## Additional Testing
 
-Pengujian MQTT over WebSocket menggunakan browser tersedia di [testing](testing/README.md).
+MQTT over WebSocket browser-based testing is available at [testing](testing/README.md).
 
-## Catatan keamanan
+## Security Notes
 
-Contoh utama memakai `ws://...:80` karena mengikuti konfigurasi yang terbukti berjalan pada implementasi awal. Untuk penggunaan jaringan publik atau produksi, gunakan **`wss://...:443`** agar lalu lintas ESP32 ke Cloudflare terenkripsi. Implementasi `wss` membutuhkan validasi sertifikat CA pada ESP32, misalnya dengan certificate bundle atau CA certificate yang sesuai.
+The main example uses `ws://...:80` because it follows a configuration proven to work in the initial implementation. For public network or production use, use **`wss://...:443`** to encrypt traffic between the ESP32 and Cloudflare. Implementing `wss` requires CA certificate validation on the ESP32, for example with a certificate bundle or an appropriate CA certificate.
 
-Jangan membuka listener port `8000` langsung ke internet. Ikat ke `127.0.0.1` dan biarkan Cloudflare Tunnel menjadi satu-satunya jalur publik. Gunakan autentikasi Mosquitto dan kata sandi yang berbeda untuk setiap lingkungan. Internet sudah cukup gaduh tanpa broker anonim yang mengundang bot iseng masuk.
+Do not open the `8000` port listener directly to the internet. Bind it to `127.0.0.1` and let Cloudflare Tunnel be the only public pathway. Use Mosquitto authentication and different passwords for each environment. The internet is already noisy enough without an anonymous broker inviting random bots in.
 
 ## Troubleshooting
 
-| Gejala | Penyebab yang umum | Pemeriksaan |
+| Symptom | Common cause | Check |
 |---|---|---|
-| `MQTT disconnected` terus menerus | hostname, DNS, atau Cloudflare Tunnel belum aktif | cek `cloudflared` log dan DNS hostname |
-| Error saat WebSocket handshake | listener `8000` bukan `protocol websockets` atau Mosquitto tidak mendukung WebSocket | cek `/etc/mosquitto/conf.d/websocket.conf` dan log Mosquitto |
-| Cloudflare `502 Bad Gateway` | `cloudflared` tidak dapat mencapai `localhost:8000` | jalankan `ss -ltnp | grep ':8000'` |
-| Koneksi berhasil, tetapi publish ditolak | username/password salah atau ACL membatasi topic | cek `password_file`, kredensial sketch, dan ACL |
-| Tidak ada data di subscriber | topic yang dipantau tidak sesuai | gunakan `-t 'sensors/#'` saat pengujian |
-| ESP32 gagal terhubung setelah pindah ke `wss://` | sertifikat CA belum tersedia pada firmware | pasang certificate bundle atau CA Cloudflare yang relevan |
+| `MQTT disconnected` repeatedly | hostname, DNS, or Cloudflare Tunnel not active | check `cloudflared` log and DNS hostname |
+| Error during WebSocket handshake | listener `8000` is not `protocol websockets` or Mosquitto doesn't support WebSocket | check `/etc/mosquitto/conf.d/websocket.conf` and Mosquitto log |
+| Cloudflare `502 Bad Gateway` | `cloudflared` cannot reach `localhost:8000` | run `ss -ltnp | grep ':8000'` |
+| Connection succeeds, but publish is rejected | wrong username/password or ACL restricting the topic | check `password_file`, sketch credentials, and ACL |
+| No data at the subscriber | monitored topic doesn't match | use `-t 'sensors/#'` during testing |
+| ESP32 fails to connect after switching to `wss://` | CA certificate not available in firmware | install the relevant Cloudflare CA or certificate bundle |
