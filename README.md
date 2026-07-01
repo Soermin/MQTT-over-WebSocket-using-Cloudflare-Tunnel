@@ -85,38 +85,83 @@ sudo journalctl -u mosquitto -n 100 --no-pager
 
 > Bila broker Anda sudah mempunyai listener `1883`, **jangan menduplikasinya**. Tambahkan hanya listener WebSocket `8000` dan sesuaikan aturan autentikasi dengan konfigurasi broker yang sudah ada.
 
-## 2. Konfigurasi Cloudflare Tunnel
+## 2. Konfigurasi Cloudflare Tunnel melalui Web UI
 
-Buat tunnel dan DNS route. Ganti nama tunnel dan hostname sesuai milik Anda.
+Konfigurasi Cloudflare Tunnel dilakukan melalui Cloudflare Dashboard agar pembuatan tunnel, hostname publik, dan DNS record dapat dikelola dari antarmuka web.
 
-```bash
-cloudflared tunnel create mqtt-websocket
-cloudflared tunnel route dns mqtt-websocket mqtt.example.com
+1. Masuk ke **Cloudflare Dashboard**.
+
+2. Buka menu:
+
+   ```text
+   Networking → Tunnels
+   ```
+
+   Pada beberapa akun atau tampilan Zero Trust, menu ini dapat berada pada:
+
+   ```text
+   Zero Trust → Networks → Connectors → Cloudflare Tunnels
+   ```
+
+3. Klik **Create Tunnel**.
+
+4. Pilih tipe connector **Cloudflared**, lalu masukkan nama tunnel, misalnya:
+
+   ```text
+   mqtt-websocket
+   ```
+
+5. Pilih sistem operasi dan arsitektur server yang menjalankan Mosquitto. Cloudflare akan menampilkan perintah instalasi dan token connector.
+
+6. Salin perintah yang diberikan Cloudflare lalu jalankan pada server. Contoh bentuk perintahnya:
+
+   ```bash
+   sudo cloudflared service install <TOKEN_DARI_CLOUDFLARE>
+   ```
+
+   Jangan membagikan token tersebut ke repository publik karena token digunakan untuk menghubungkan server ke tunnel Cloudflare.
+
+7. Setelah connector aktif, kembali ke halaman tunnel lalu buka tab **Routes**.
+
+8. Klik **Add route** kemudian pilih **Published application**.
+
+9. Isi konfigurasi berikut:
+
+   | Parameter    | Nilai                   |
+   | ------------ | ----------------------- |
+   | Hostname     | `mqtt.example.com`      |
+   | Service type | `HTTP`                  |
+   | URL          | `http://localhost:8000` |
+
+   Ganti `mqtt.example.com` dengan subdomain milik Anda.
+
+10. Klik **Add route** atau **Save hostname**.
+
+Cloudflare akan membuat DNS record untuk hostname tersebut dan meneruskan koneksi HTTP maupun WebSocket ke service lokal Mosquitto pada port `8000`.
+
+Arsitektur koneksinya menjadi:
+
+```text
+ESP32
+  → ws://mqtt.example.com:80
+  → Cloudflare Tunnel
+  → http://localhost:8000
+  → Mosquitto WebSocket Listener
 ```
 
-Simpan `cloudflared/config.yml.example` sebagai `/etc/cloudflared/config.yml` lalu isi UUID tunnel dan lokasi file kredensial yang dibuat Cloudflare.
+Untuk penggunaan produksi, gunakan koneksi terenkripsi:
 
-```yaml
-tunnel: <TUNNEL_UUID>
-credentials-file: /etc/cloudflared/<TUNNEL_UUID>.json
-
-ingress:
-  - hostname: mqtt.example.com
-    service: http://localhost:8000
-  - service: http_status:404
+```text
+wss://mqtt.example.com:443
 ```
 
-Jalankan tunnel untuk pengujian:
+Cloudflare Tunnel tetap diarahkan ke:
 
-```bash
-sudo cloudflared --config /etc/cloudflared/config.yml tunnel run mqtt-websocket
+```text
+http://localhost:8000
 ```
 
-Setelah berhasil, jalankan sebagai service sesuai metode instalasi `cloudflared` pada server Anda. Pantau log saat pengujian:
-
-```bash
-sudo journalctl -u cloudflared -f
-```
+karena WebSocket dimulai sebagai koneksi HTTP lalu melakukan proses upgrade ke WebSocket pada listener Mosquitto.
 
 ## 3. Konfigurasi sketch ESP32
 
