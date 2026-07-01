@@ -2,7 +2,6 @@
 
 Contoh ini menunjukkan cara menghubungkan ESP32 ke broker MQTT melalui **WebSocket** yang dipublikasikan memakai **Cloudflare Tunnel**.
 
-> Fokus repositori ini adalah jalur komunikasi MQTT-over-WebSocket. Fitur proyek asli seperti WiFiManager, EEPROM, BH1750, MH-Z19C, reset button, dan watchdog sengaja tidak dimasukkan agar contoh mudah dipahami dan dipakai ulang.
 
 ## Arsitektur
 
