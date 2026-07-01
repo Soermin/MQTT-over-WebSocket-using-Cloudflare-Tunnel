@@ -20,7 +20,7 @@ wss://domain.anda.com:443
 → Mosquitto WebSocket listener
 ```
 
-# Publish Test
+### Publish Test
 
 <img width="1270" height="791" alt="image" src="https://github.com/user-attachments/assets/fb7e78ae-65e1-4197-8e18-a335a66019fa" />
 
@@ -36,7 +36,7 @@ Pada gateway, subscriber lokal dijalankan dengan:
 mosquitto_sub -t "coba_mqtt_over_websocket" -v
 ```
 
-Pesan berhasil diterima oleh Mosquitto lokal:
+### Pesan berhasil diterima oleh Mosquitto lokal:
 
 <img width="638" height="120" alt="image" src="https://github.com/user-attachments/assets/907472c4-7cd2-43a4-84f5-8e21a9e4a634" />
 
