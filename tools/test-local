@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Usage:
+# MQTT_USERNAME=esp32-node MQTT_PASSWORD='your-password' ./test-local.sh
+set -euo pipefail
+
+: "${MQTT_USERNAME:?Set MQTT_USERNAME first}"
+: "${MQTT_PASSWORD:?Set MQTT_PASSWORD first}"
+
+mosquitto_sub \
+  -h 127.0.0.1 \
+  -p 1883 \
+  -u "$MQTT_USERNAME" \
+  -P "$MQTT_PASSWORD" \
+  -t 'sensors/#' \
+  -v
