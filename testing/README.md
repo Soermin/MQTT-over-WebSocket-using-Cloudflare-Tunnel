@@ -6,7 +6,7 @@ Pengujian dilakukan menggunakan [HiveMQ WebSocket Client](https://www.hivemq.com
 
 | Parameter | Nilai |
 |---|---|
-| Host | `gateway.tobafarm.my.id` |
+| Host | `mqtt.example.com` |
 | Port | `443` |
 | SSL | Aktif |
 | Client ID | Bebas dan unik |
@@ -14,7 +14,7 @@ Pengujian dilakukan menggunakan [HiveMQ WebSocket Client](https://www.hivemq.com
 Browser terhubung melalui:
 
 ```text
-wss://domain.anda.com:443
+wss://mqtt.example.com:443
 → Cloudflare Tunnel
 → http://localhost:8000
 → Mosquitto WebSocket listener
