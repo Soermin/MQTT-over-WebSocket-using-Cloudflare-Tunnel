@@ -222,7 +222,7 @@ Perintah akan muncul di Serial Monitor ESP32.
 
 ## Pengujian Tambahan
 
-Pengujian MQTT over WebSocket menggunakan browser tersedia di [testing/hivemq-websocket](testing/hivemq-websocket/README.md).
+Pengujian MQTT over WebSocket menggunakan browser tersedia di [testing/](testing/README.md).
 
 ## Catatan keamanan
 
