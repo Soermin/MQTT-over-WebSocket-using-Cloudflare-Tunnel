@@ -37,5 +37,7 @@ mosquitto_sub -t "coba_mqtt_over_websocket" -v
 ```
 
 Pesan berhasil diterima oleh Mosquitto lokal:
+<img width="638" height="120" alt="image" src="https://github.com/user-attachments/assets/907472c4-7cd2-43a4-84f5-8e21a9e4a634" />
+
 
 Pengujian ini membuktikan bahwa client browser dapat melakukan publish MQTT melalui WebSocket dan Cloudflare Tunnel ke Mosquitto Broker lokal.
