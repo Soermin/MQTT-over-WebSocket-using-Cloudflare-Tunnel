@@ -236,7 +236,3 @@ Jangan membuka listener port `8000` langsung ke internet. Ikat ke `127.0.0.1` da
 | Koneksi berhasil, tetapi publish ditolak | username/password salah atau ACL membatasi topic | cek `password_file`, kredensial sketch, dan ACL |
 | Tidak ada data di subscriber | topic yang dipantau tidak sesuai | gunakan `-t 'sensors/#'` saat pengujian |
 | ESP32 gagal terhubung setelah pindah ke `wss://` | sertifikat CA belum tersedia pada firmware | pasang certificate bundle atau CA Cloudflare yang relevan |
-
-## Lisensi
-
-MIT License. Sesuaikan nama penulis sebelum dipublikasikan.
